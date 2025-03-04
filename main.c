@@ -1,5 +1,37 @@
 #include "push_swap.h"
 
+void print_operations(int *operations)// poner la estructura como en el ejemplo
+{
+    int i = 0;
+
+    while (operations[i]){
+        if (operations[i] == 1)
+            printf("1 ");
+        else if (operations[i] == 2)
+            printf("2 ");
+        else if (operations[i] == 3)
+            printf("3 ");
+        else if (operations[i] == 4)
+            printf("4 ");
+        else if (operations[i] == 5)
+            printf("5 ");
+        else if (operations[i] == 6)
+            printf("6 ");
+        else if (operations[i] == 7)
+            printf("7 ");
+        else if (operations[i] == 8)
+            printf("8 ");
+        else if (operations[i] == 9)
+            printf("9 ");
+        else if (operations[i] == 10)
+            printf("10 ");
+        else if (operations[i] == 11)
+            printf("11 ");
+        i++;
+    }
+    printf("\n");
+}
+
 int initialize_stack(t_stack *stack, int malloc_size)
 {
     int i;
@@ -69,9 +101,11 @@ void reset_operations(int *operation, int i) {
 }
 
 
-void next_operation(int *operation){
+void next_operation(int *operation, int stack_initial_size){
 // sa ra rra pb pa sb rb rrb ss rr  rrr
 // 1  2  3   4  5  6  7  8   9  10  11
+    print_operations(operation);
+
     int i = 0;
     int functions = 8;
 
@@ -86,12 +120,14 @@ void next_operation(int *operation){
         reset_operations(operation, i);
     else
         operation[i] += 1;
-    // funcion para optimizar operaciones
+
+
+    stack_initial_size += 0;
+
+    optimice(operation, stack_initial_size);
 }
 
 void calculate_operations(t_stack *stackA, t_stack *stackB, int *operations){
-// sa ra rra pb pa sb rb rrb ss rr  rrr
-// 1  2  3   4  5  6  7  8   9  10  11
     int i = 0;
 
     while (operations[i]){
@@ -111,37 +147,24 @@ void calculate_operations(t_stack *stackA, t_stack *stackB, int *operations){
             rotate(stackB);
         else if (operations[i] == 8)
             reverse_rotate(stackB);
+        else if (operations[i] == 9){
+            swap(stackA);
+            swap(stackB);
+        }
+        else if (operations[i] == 10){
+            rotate(stackA);
+            rotate(stackB);
+        }
+        else if (operations[i] == 11){
+            reverse_rotate(stackA);
+            reverse_rotate(stackB);
+        }
         i++;
     }
-}
-
-void print_operations(int *operations)// poner la estructura como en el ejemplo
-{
-    int i = 0;
-
-    while (operations[i]){
-        if (operations[i] == 1)
-            printf("sa ");
-        else if (operations[i] == 2)
-            printf("ra ");
-        else if (operations[i] == 3)
-            printf("rra ");
-        else if (operations[i] == 4)
-            printf("pb ");
-        else if (operations[i] == 5)
-            printf("pa ");
-        else if (operations[i] == 6)
-            printf("sb ");
-        else if (operations[i] == 7)
-            printf("rb ");
-        else if (operations[i] == 8)
-            printf("rrb ");
-        i++;
-    }
-    printf("\n");
 }
 
 void brute_force(t_stack *stackA, t_stack *stackB, int argc, char *argv[]){
+    int operaciones_totales = 0; // Debug
     int i;
     int *operations;
     int finish;
@@ -150,17 +173,18 @@ void brute_force(t_stack *stackA, t_stack *stackB, int argc, char *argv[]){
     if (!operations)
         return;
     i = 0;
-    while (i < 10)
+    while (i < 100)
         operations[i++] = 0;
     finish = is_correct(stackA);
     while (!finish)
     {
-        next_operation(operations);
+        next_operation(operations, stackA->size);
         calculate_operations(stackA, stackB, operations);
-        print_operations(operations); // Debug
-        print_stack(stackA); // Debug
-        print_stack(stackB); // Debug
-        printf("\n"); // Debug
+        // print_operations(operations); // Debug
+        operaciones_totales++; // Debug
+        // print_stack(stackA); // Debug
+        // print_stack(stackB); // Debug
+        // printf("\n"); // Debug
         finish = (stackA->size == argc - 1) && is_correct(stackA);
         if (!finish){
             free(stackA->data);
@@ -169,9 +193,11 @@ void brute_force(t_stack *stackA, t_stack *stackB, int argc, char *argv[]){
             initialize_stack(stackB, 0);
             load_stack(stackA, argc, argv);
         }
+        // printf("Operaciones totales: %d\n", operaciones_totales); // Debug
     }
     print_operations(operations);
     free(operations);
+    printf("Operaciones totales: %d\n", operaciones_totales); // Debug
 }
 
 int main(int argc, char *argv[]) {
@@ -190,13 +216,13 @@ int main(int argc, char *argv[]) {
     if (has_duplicates(&stackA))
         return (free(stackA.data), free(stackB.data), printf("Error\n"), 1);
 
-    printf("Stack A cargado exitosamente.\n");
-    print_stack(&stackA);
+    // printf("Stack A cargado exitosamente.\n");
+    // print_stack(&stackA);
 
     brute_force(&stackA, &stackB, argc, argv);
 
-    printf("Stack A ordenado exitosamente.\n");
-    print_stack(&stackA);
+    // printf("Stack A ordenado exitosamente.\n");
+    // print_stack(&stackA);
 
     return (free(stackA.data), free(stackB.data), 0);
 }

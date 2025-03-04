@@ -13,12 +13,23 @@ void swap(t_stack *stack)
 
 void push(t_stack *stack_dest, t_stack *stack_orig)
 {
+    int i;
     if (stack_orig->size == 0)
         return;
-    stack_dest->size++;
-    rotate(stack_dest);
+    i = stack_dest->size;
+    while (i > 0)
+    {
+        stack_dest->data[i] = stack_dest->data[i - 1];
+        i--;
+    }
     stack_dest->data[0] = stack_orig->data[0];
-    rotate(stack_orig);
+    stack_dest->size++;
+    i = 0;
+    while (i < stack_orig->size - 1)
+    {
+        stack_orig->data[i] = stack_orig->data[i + 1];
+        i++;
+    }
     stack_orig->size--;
 }
 

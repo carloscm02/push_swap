@@ -6,6 +6,7 @@ CFLAGS = -Wall -Werror -Wextra -no-pie -g
 SRC = main.c \
       check.c \
 	  swap_utils.c \
+	  optimization_utils.c \
 
 OBJ = $(SRC:.c=.o)
 
