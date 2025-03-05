@@ -73,8 +73,17 @@ int is_correct(t_stack *stackA){
     return 1;
 }
 
+void reset_and_ad_one_more(int *operation){
+    int i = 0;
+    while (operation[i]) {
+        operation[i] = 1;
+        i++;
+    }
+    operation[i] = 1;
+}
+
 void reset_operations(int *operation, int i) {
-    int functions = 8;
+    int functions = 11;
     int j;
     j = i;
     while (j > 0 && operation[j] == functions) {
@@ -82,11 +91,7 @@ void reset_operations(int *operation, int i) {
     }
 
     if(j == 0 && operation[j] == functions) {
-        while (operation[j]) {
-            operation[j] = 1;
-            j++;
-        }
-        operation[j] = 1;
+        reset_and_ad_one_more(operation);
     }else if (j == 0) {
         operation[j] += 1;
         while (operation[++j]) {
@@ -107,7 +112,7 @@ void next_operation(int *operation, int stack_initial_size){
     print_operations(operation);
 
     int i = 0;
-    int functions = 8;
+    int functions = 11;
 
     while (operation[i])
         i++;
@@ -181,7 +186,7 @@ void brute_force(t_stack *stackA, t_stack *stackB, int argc, char *argv[]){
         next_operation(operations, stackA->size);
         calculate_operations(stackA, stackB, operations);
         // print_operations(operations); // Debug
-        operaciones_totales++; // Debug
+        // operaciones_totales++; // Debug
         // print_stack(stackA); // Debug
         // print_stack(stackB); // Debug
         // printf("\n"); // Debug

@@ -18,6 +18,7 @@ void	rotate(t_stack *stack);
 void	reverse_rotate(t_stack *stack);
 
 void    next_operation(int *operation, int stack_initial_size);
+void    reset_and_ad_one_more(int *operation);
 
 void    optimice(int *operation, int stackA_size);
 

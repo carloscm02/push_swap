@@ -1,10 +1,5 @@
 #include "push_swap.h"
-//     int i = start;
-//     while (operation[i]) {
-//         operation[i] = operation[i + 1];
-//         i++;
-//     }
-// }
+
 
 int optimiced_sa(int *operation, int stackA_size){
     int changes = 0;
@@ -94,7 +89,7 @@ int optimiced_pb(int *operation, int stackA_size){
     int i = 0;
 
     while (operation[i]){
-        if (operation[i] == 4){
+        if (operation[i] == 4){ // si se intenta pasar de 'a' a 'b' y a es 0
             if(stackA_size - stackB_current_size < 1){
                 operation[i] = 5;
                 changes = 1;
@@ -113,22 +108,32 @@ int optimiced_pb(int *operation, int stackA_size){
 }
 
 int optimiced_pa(int *operation, int stackA_size){
+    int count_pa = 0;
+    int count_pb = 0;
     int changes = 0;
     int i = 0;
 
     while (operation[i]){
-        if (operation[i] == 4){
-            if(stackA_size < 1){
+        if (operation[i] == 5){// controla que no haya un 'pa' antes que un 'pb'
+            count_pa++;
+            if(count_pa > count_pb){
+                operation[i] = 6;
+                changes = 1;
+                count_pa--;
+            }
+        }
+        if (operation[i] == 4)
+        count_pb++;
+        if (operation[i] == 5){
+            if (stackA_size - count_pb + count_pa < 0){
                 operation[i] = 6;
                 changes = 1;
             }
-            stackA_size--;
-        }
-        if (operation[i] == 5)
-            stackA_size++;
-        if (i > 0 && operation[i] == 5 && operation[i - 1] == 4){
-            operation[i] = 6;
-            changes = 1;
+            if (i > 0 && operation[i - 1] == 4){
+                operation[i] = 6;
+                changes = 1;
+                count_pa--;
+            }
         }
         i++;
     }
@@ -137,6 +142,7 @@ int optimiced_pa(int *operation, int stackA_size){
 
 int optimiced_p(int *operation){
     int changes = 0;
+    int impar = 0;
     int amount_pb = 0;
     int amount_pa = 0;
     int i = 0;
@@ -145,16 +151,41 @@ int optimiced_p(int *operation){
         if (operation[i] == 4)// pb
             amount_pb++;
         if (operation[i] == 5){// pa
-            if (++amount_pa > amount_pb){
-                operation[i] = 6;
-                changes = 1;
-            }
+            amount_pa++;
         }
         i++;
     }
+    i--;
+    if ((amount_pa + amount_pb) > 0 && (amount_pa + amount_pb) % 2 == 1){
+        impar = 1;
+    }
+    while (amount_pb - amount_pa != 0){
+        if (operation[i] == 4){
+            if (impar){
+                operation[i] = 6;
+                amount_pb--;
+            }
+            else if (amount_pb > amount_pa) {
+                operation[i] = 5;
+                amount_pa++;
+                amount_pb--;
+            }
+        }
+        if (operation[i] == 5){
+            if (impar){
+                operation[i] = 6;
+                amount_pa--;
+            }
+            else if (amount_pa > amount_pb){
+                operation[i] = 6;
+                amount_pa--;
+            }
+        }
+        i--;
+        changes = 1;
+    }
+    
     return changes;
-    // if (amount_pb != amount_pa) // si al finalinar no hay tantos pa como pb, pasamos a la siguinete
-    //     next_operation(operation, stackA_size);
 }
 
 int optimiced_sb(int *operation){
@@ -186,10 +217,6 @@ int optimiced_sb(int *operation){
     return changes;
 }
 
-
-
-
-
 int optimiced_rb(int *operation){
     int changes = 0;
     int consecutive_rb = 0;
@@ -219,15 +246,17 @@ int optimiced_rb(int *operation){
     return changes;
 }
 
-void optimiced_rrb(int *operation, int stackA_size){
+int optimiced_rrb(int *operation){
+    int changes = 0;
     int consecutive_rrb = 0;
     int current_size = 0;
     int i = 0;
 
     while(operation[i]){
-        if (i && operation[i - 1] == 7 && operation[i] == 8){ // si este es un rra y el anterior es un ra paso a pa siguiente
-            next_operation(operation, stackA_size);
-            return;
+        if (i && ((operation[i - 1] == 7 && operation[i] == 8) || // si el anterior es un ra paso a pa siguiente
+        (operation[i - 1] == 7 && operation[i] == 8))){// si el anterior es un rr paso a pa siguiente
+            changes = 1;
+            operation[i] = 9;
         }
         if(operation[i] == 4) // mira a ver si esta dando una vuelta completa en el stackA
             current_size++;
@@ -235,17 +264,19 @@ void optimiced_rrb(int *operation, int stackA_size){
             current_size--;
         if(operation[i] == 8){
             consecutive_rrb++;
-            if (current_size == consecutive_rrb || current_size < 2){
-                next_operation(operation, stackA_size);
-                return;
+            if (current_size <= consecutive_rrb || current_size < 2){
+                changes = 1;
+                operation[i] = 9;
             }
         }else
             consecutive_rrb = 0;
         i++;
     }
+    return changes;
 }
 
-void optimiced_ss(int *operation, int stackA_size){
+int optimiced_ss(int *operation, int stackA_size){ //sa y sb
+    int changes = 0;
     int current_size_a = stackA_size;
     int i = 0;
 
@@ -257,27 +288,29 @@ void optimiced_ss(int *operation, int stackA_size){
         if(operation[i] == 9){
             if (current_size_a < 2 ||
                 stackA_size - current_size_a < 2){
-                next_operation(operation, stackA_size);
-                return; 
+                changes = 1;
+                operation[i] = 10;
                 }
-            if (!i)
+            if (i == 0)
             {
-                next_operation(operation, stackA_size);
-                return;  
+                changes = 1;
+                operation[i] = 10;
             }else {
                 if (operation[i - 1] == 1 ||
                     operation[i - 1] == 6 ||
                     operation[i - 1] == 9){
-                    next_operation(operation, stackA_size);
-                    return;
+                        changes = 1;
+                        operation[i] = 10;
                 }
             }
         }
         i++;
     }
+    return changes;
 }
 
-void optimiced_rr(int *operation, int stackA_size){
+int optimiced_rr(int *operation, int stackA_size){ // ra y rb (10)
+    int changes = 0;
     int size_stack_a = stackA_size;
     int consecutive_rr = 0;
     int i = 0;
@@ -292,24 +325,27 @@ void optimiced_rr(int *operation, int stackA_size){
             if (size_stack_a <= consecutive_rr ||
                 stackA_size - size_stack_a <= consecutive_rr
             ){
-                next_operation(operation, stackA_size);
-                return;
+                changes = 1;
+                operation[i] = 11;
             }
-            if (!i)
+            if (i == 0)
             {
-                next_operation(operation, stackA_size);
-                return;  
+                changes = 1;
+                operation[i] = 11;
             } else if (operation[i - 1] == 11){
-                next_operation(operation, stackA_size);
-                return;  
+                changes = 1;
+                operation[i] = 11;
             }
         }else
             consecutive_rr = 0;
         i++;
     }
+    return changes;
 }
 
-void optimiced_rrr(int *operation, int stackA_size){
+
+
+void optimiced_rrr(int *operation, int stackA_size){ // rra y rrb (11)
     int size_stack_a = stackA_size;
     int consecutive_rrr = 0;
     int i = 0;
@@ -321,19 +357,24 @@ void optimiced_rrr(int *operation, int stackA_size){
             size_stack_a++;
         if(operation[i] == 11){
             consecutive_rrr++;
-            if (size_stack_a <= consecutive_rrr ||
-                stackA_size - size_stack_a <= consecutive_rrr
-            ){
-                next_operation(operation, stackA_size);
+            if (i == 0)
+            {
+                reset_and_ad_one_more(operation); // esta funcion me imprime una linea de más que es incorrecta(1 1 1 1 1 1)
                 return;
             }
-            if (!i)
-            {
-                next_operation(operation, stackA_size);
-                return;  
-            } else if (operation[i - 1] == 10){
-                next_operation(operation, stackA_size);
-                return;  
+            else{
+                if (operation[i - 1] == 10){
+                    operation[i - 1] = 11;
+                    operation[i] = 1;
+                    return;
+                }
+                if (operation[i - 1] != 11 && (size_stack_a <= consecutive_rrr || // vuelta entera o mas que stackA
+                    stackA_size - size_stack_a <= consecutive_rrr) // vuelta entera o mas q stackB
+                ){
+                    operation[i - 1] += 1;
+                    operation[i] = 1;
+                    // return;
+                }
             }
         }else
             consecutive_rrr = 0;
@@ -343,20 +384,26 @@ void optimiced_rrr(int *operation, int stackA_size){
 
 
 void optimice(int *operation, int stackA_size){
-    
-    while (optimiced_sa(operation, stackA_size) ||
-    optimiced_ra(operation, stackA_size) ||
-    optimiced_rra(operation, stackA_size) ||
-    optimiced_pb(operation, stackA_size) ||
-    optimiced_pa(operation, stackA_size) ||
-    optimiced_p(operation) ||
-    optimiced_sb(operation) ||
-    optimiced_rb(operation));
+    int changed = 1;
+    int p_incorrect = 0;
 
-    // optimiced_p(operation, stackA_size);
-    // optimiced_rb(operation);
-    // optimiced_rrb(operation, stackA_size);
-    // optimiced_ss(operation, stackA_size);
-    // optimiced_rr(operation, stackA_size);
-    // optimiced_rrr(operation, stackA_size);
+    while (changed){
+        changed = 0;
+        changed += optimiced_sa(operation, stackA_size);
+        changed += optimiced_ra(operation, stackA_size);
+        changed += optimiced_rra(operation, stackA_size);
+        changed += optimiced_pb(operation, stackA_size);
+        changed += optimiced_pa(operation, stackA_size);
+        //changed += optimiced_p(operation);
+        changed += optimiced_sb(operation);
+        changed += optimiced_rb(operation);
+        changed += optimiced_rrb(operation);
+        changed += optimiced_ss(operation, stackA_size);
+        changed += optimiced_rr(operation, stackA_size);
+    }
+
+    if (p_incorrect)
+        printf("la siguiente tiene los p incorrectos: ");
+
+    optimiced_rrr(operation, stackA_size);
 }
